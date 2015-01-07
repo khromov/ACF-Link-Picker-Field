@@ -1,19 +1,23 @@
 var doingLink = '';
 
-(function($){
-	
-	function initialize_field( $el ) {
-		
-		//$el.doStuff();
-		
+(function($)
+{
+	function initialize_field( $el )
+    {
         jQuery('body').on('click', '.link-btn', function(event) 
         {
-            var thisID = jQuery(this).attr("id");
-            doingLink = thisID;
+            doingLink = jQuery(this).attr("id");
             
             wpActiveEditor = true; // we need to override this var as the link dialogue is expecting an actual wp_editor instance
-            //console.log(wpLink);
-            wpLink.open(); // open the link popup
+
+            wpLink.setDefaultValues();
+            wpLink.open();
+             // open the link popup
+            /*
+            console.log(wpLink.inputs);
+            event.preventDefault ? event.preventDefault() : event.returnValue = false;
+            event.stopPropagation();
+            */
             return false;
         });
         
@@ -22,16 +26,14 @@ var doingLink = '';
             if (doingLink != '')
             {
                 var linkAtts = wpLink.getAttrs(); // the links attributes (href, target) are stored in an object, which can be access via  wpLink.getAttrs()
-                
-                //console.log('#' + doingLink + '-url');
-                //console.log(jQuery('#' + doingLink + '-url').length);
-                
+
                 jQuery('#' + doingLink + '-url').val(linkAtts.href);
                 jQuery('#' + doingLink + '-title').val(linkAtts.title);
                 jQuery('#' + doingLink + '-target').val(linkAtts.target);
                 
                 jQuery('#' + doingLink + '-url-label').html('<a href="' + linkAtts.href + '" target="_blank">' + linkAtts.href + '</a>');
                 jQuery('#' + doingLink + '-title-label').html(linkAtts.title);
+
 				if (typeof acf._e != 'undefined')
 				{
 					jQuery('#' + doingLink + '-target-label').html((linkAtts.target == '_blank') ? acf._e('link_picker', 'yes') : acf._e('link_picker', 'no'));
@@ -118,7 +120,6 @@ var doingLink = '';
 	}
 	
 	if( typeof acf.add_action !== 'undefined' ) {
-	
 		/*
 		*  ready append (ACF5)
 		*
@@ -134,14 +135,10 @@ var doingLink = '';
 		*/
 		
 		acf.add_action('ready append', function( $el ){
-			
 			// search $el for fields of type 'FIELD_NAME'
 			acf.get_fields({ type : 'link_picker'}, $el).each(function(){
-				
 				initialize_field( $(this) );
-				
 			});
-			
 		});
 		
 	} else {
@@ -164,13 +161,8 @@ var doingLink = '';
 		$(document).live('acf/setup_fields', function(e, postbox){
 			
 			$(postbox).find('.field[data-field_type="link_picker"]').each(function(){
-				
 				initialize_field( $(this) );
-				
 			});
-		
 		});
-	
 	}
-
 })(jQuery);

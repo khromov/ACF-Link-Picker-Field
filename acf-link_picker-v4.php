@@ -84,9 +84,8 @@ class acf_field_link_picker extends acf_field {
 		//ACF 4 compatibility, so we can use the same template
 		$field['key'] = $field['id'];
 
-		include 'templates/field_admin_v4.php';
+		include 'templates/field_admin.php';
 	}
-	
 	
 	/*
 	*  input_admin_enqueue_scripts()
