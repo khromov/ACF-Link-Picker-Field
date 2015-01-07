@@ -22,17 +22,11 @@ class acf_field_link_picker extends acf_field {
 		$this->name = 'link_picker';
 		$this->label = __('Link Picker');
 		$this->category = __("Choice",'acf'); // Basic, Content, Choice, etc
-		$this->defaults = array(
-			// add default here to merge into your field. 
-			// This makes life easy when creating the field options as you don't need to use any if( isset('') ) logic. eg:
-			//'preview_size' => 'thumbnail'
-		);
-		
+		$this->defaults = array();
 		
 		// do not delete!
     	parent::__construct();
-    	
-    	
+
     	// settings
 		$this->settings = array(
 			'path' => apply_filters('acf/helpers/get_path', __FILE__),
@@ -41,8 +35,7 @@ class acf_field_link_picker extends acf_field {
 		);
 
 	}
-	
-	
+
 	/*
 	*  create_options()
 	*
@@ -55,28 +48,11 @@ class acf_field_link_picker extends acf_field {
 	*
 	*  @param	$field	- an array holding all the field's data
 	*/
-	
 	function create_options( $field )
 	{
-		// defaults?
-		/*
-		$field = array_merge($this->defaults, $field);
-		*/
-		
 		// key is needed in the field names to correctly save the data
 		$key = $field['name'];
-		
-		
-		// Create Field Options HTML
-		?>
-<!--<tr class="field_option field_option_<?php echo $this->name; ?>">
-	<td class="label">
-		<label><?php _e("Preview Size",'acf'); ?></label>
-		<p class="description"><?php _e("Thumbnail is advised",'acf'); ?></p>
-	</td>
-	<td>
-		<?php
-		
+
 		do_action('acf/create_field', array(
 			'type'		=>	'radio',
 			'name'		=>	'fields['.$key.'][preview_size]',
@@ -87,14 +63,7 @@ class acf_field_link_picker extends acf_field {
 				'something_else' => __('Something Else'),
 			)
 		));
-		
-		?>
-	</td>
-</tr>-->
-		<?php
-		
 	}
-	
 	
 	/*
 	*  create_field()
@@ -107,48 +76,15 @@ class acf_field_link_picker extends acf_field {
 	*  @since	3.6
 	*  @date	23/01/13
 	*/
-	
 	function create_field( $field )
 	{
-		// defaults?
-		/*
-		$field = array_merge($this->defaults, $field);
-		*/
-		
-		// perhaps use $field['preview_size'] to alter the markup?
-		//var_dump($field);
-        
         $exists = true;
-        if ($field['value'] === FALSE || (isset($field['value']['url']) && $field['value']['url'] == ''))
-        {
-            $exists = false;
-        }
-        
-		// create Field HTML
-		?>
-		<div id="link-picker-<?php echo $field['key']; ?>-wrap">
-            <p>
-                Currently selected page:
-                
-                <input type="hidden" name="<?php echo $field['name']; ?>[url]" id="link-picker-<?php echo $field['key']; ?>-url" value="<?php echo $field['value']['url']; ?>">
-                <input type="hidden" name="<?php echo $field['name']; ?>[title]" id="link-picker-<?php echo $field['key']; ?>-title" value="<?php echo $field['value']['title']; ?>">
-                <input type="hidden" name="<?php echo $field['name']; ?>[target]" id="link-picker-<?php echo $field['key']; ?>-target" value="<?php echo $field['value']['target']; ?>">
-                
-                <div id="link-picker-<?php echo $field['key']; ?>-exists"<?php if (!$exists) { echo ' style="display:none;"'; } ?>>
-                    URL: <em id="link-picker-<?php echo $field['key']; ?>-url-label"><a href="<?php echo $field['value']['url']; ?>" target="_blank"><?php echo $field['value']['url']; ?></a></em><br>
-                    Title: <em id="link-picker-<?php echo $field['key']; ?>-title-label"><?php echo $field['value']['title']; ?></em><br>
-                    Open in new window: <em id="link-picker-<?php echo $field['key']; ?>-target-label"><?php if (isset($field['value']['target']) && $field['value']['target'] == '_blank') { echo 'Yes'; } ?></em>
-                </div>
-                <div id="link-picker-<?php echo $field['key']; ?>-none"<?php if ($exists) { echo ' style="display:none;"'; } ?>>
-                    <em>No link selected yet</em>
-                </div>
-            </p>
-            <p>
-                <a href="" class="link-btn acf-button grey" id="link-picker-<?php echo $field['key']; ?>"><?php if (!$exists) { echo 'Insert'; }else{ echo 'Edit'; } ?> Link</a>
-                <a href="" class="link-remove-btn acf-button grey" id="link-picker-<?php echo $field['key']; ?>-remove"<?php if (!$exists) { echo ' style="display:none;"'; } ?>>Remove Link</a>
-            </p>
-		</div>
-		<?php
+		$exists = ($field['value'] === FALSE || (isset($field['value']['url']) && $field['value']['url'] == '')) ? false : true;
+
+		//ACF 4 compatibility, so we can use the same template
+		$field['key'] = $field['id'];
+
+		include 'templates/field_admin_v4.php';
 	}
 	
 	
@@ -163,11 +99,8 @@ class acf_field_link_picker extends acf_field {
 	*  @since	3.6
 	*  @date	23/01/13
 	*/
-
 	function input_admin_enqueue_scripts()
 	{
-		// Note: This function can be removed if not used
-		
 		// register ACF scripts
 		wp_register_script( 'acf-input-link_picker', $this->settings['dir'] . 'js/input.js', array('acf-input'), $this->settings['version'] );
 		//wp_register_style( 'acf-input-link_picker', $this->settings['dir'] . 'css/input.css', array('acf-input'), $this->settings['version'] ); 
@@ -183,217 +116,4 @@ class acf_field_link_picker extends acf_field {
 		));
 		
 	}
-	
-	
-	/*
-	*  input_admin_head()
-	*
-	*  This action is called in the admin_head action on the edit screen where your field is created.
-	*  Use this action to add CSS and JavaScript to assist your create_field() action.
-	*
-	*  @info	http://codex.wordpress.org/Plugin_API/Action_Reference/admin_head
-	*  @type	action
-	*  @since	3.6
-	*  @date	23/01/13
-	*/
-
-	function input_admin_head()
-	{
-		// Note: This function can be removed if not used
-	}
-	
-	
-	/*
-	*  field_group_admin_enqueue_scripts()
-	*
-	*  This action is called in the admin_enqueue_scripts action on the edit screen where your field is edited.
-	*  Use this action to add CSS + JavaScript to assist your create_field_options() action.
-	*
-	*  $info	http://codex.wordpress.org/Plugin_API/Action_Reference/admin_enqueue_scripts
-	*  @type	action
-	*  @since	3.6
-	*  @date	23/01/13
-	*/
-
-	function field_group_admin_enqueue_scripts()
-	{
-		// Note: This function can be removed if not used
-	}
-
-	
-	/*
-	*  field_group_admin_head()
-	*
-	*  This action is called in the admin_head action on the edit screen where your field is edited.
-	*  Use this action to add CSS and JavaScript to assist your create_field_options() action.
-	*
-	*  @info	http://codex.wordpress.org/Plugin_API/Action_Reference/admin_head
-	*  @type	action
-	*  @since	3.6
-	*  @date	23/01/13
-	*/
-
-	function field_group_admin_head()
-	{
-		// Note: This function can be removed if not used
-	}
-
-
-	/*
-	*  load_value()
-	*
-		*  This filter is applied to the $value after it is loaded from the db
-	*
-	*  @type	filter
-	*  @since	3.6
-	*  @date	23/01/13
-	*
-	*  @param	$value - the value found in the database
-	*  @param	$post_id - the $post_id from which the value was loaded
-	*  @param	$field - the field array holding all the field options
-	*
-	*  @return	$value - the value to be saved in the database
-	*/
-	
-	function load_value( $value, $post_id, $field )
-	{
-		// Note: This function can be removed if not used
-		return $value;
-	}
-	
-	
-	/*
-	*  update_value()
-	*
-	*  This filter is applied to the $value before it is updated in the db
-	*
-	*  @type	filter
-	*  @since	3.6
-	*  @date	23/01/13
-	*
-	*  @param	$value - the value which will be saved in the database
-	*  @param	$post_id - the $post_id of which the value will be saved
-	*  @param	$field - the field array holding all the field options
-	*
-	*  @return	$value - the modified value
-	*/
-	
-	function update_value( $value, $post_id, $field )
-	{
-		// Note: This function can be removed if not used
-		return $value;
-	}
-	
-	
-	/*
-	*  format_value()
-	*
-	*  This filter is applied to the $value after it is loaded from the db and before it is passed to the create_field action
-	*
-	*  @type	filter
-	*  @since	3.6
-	*  @date	23/01/13
-	*
-	*  @param	$value	- the value which was loaded from the database
-	*  @param	$post_id - the $post_id from which the value was loaded
-	*  @param	$field	- the field array holding all the field options
-	*
-	*  @return	$value	- the modified value
-	*/
-	
-	function format_value( $value, $post_id, $field )
-	{
-		// defaults?
-		/*
-		$field = array_merge($this->defaults, $field);
-		*/
-		
-		// perhaps use $field['preview_size'] to alter the $value?
-		
-		
-		// Note: This function can be removed if not used
-		return $value;
-	}
-	
-	
-	/*
-	*  format_value_for_api()
-	*
-	*  This filter is applied to the $value after it is loaded from the db and before it is passed back to the API functions such as the_field
-	*
-	*  @type	filter
-	*  @since	3.6
-	*  @date	23/01/13
-	*
-	*  @param	$value	- the value which was loaded from the database
-	*  @param	$post_id - the $post_id from which the value was loaded
-	*  @param	$field	- the field array holding all the field options
-	*
-	*  @return	$value	- the modified value
-	*/
-	
-	function format_value_for_api( $value, $post_id, $field )
-	{
-		// defaults?
-		/*
-		$field = array_merge($this->defaults, $field);
-		*/
-		
-		// perhaps use $field['preview_size'] to alter the $value?
-		
-		
-		// Note: This function can be removed if not used
-		return $value;
-	}
-	
-	
-	/*
-	*  load_field()
-	*
-	*  This filter is applied to the $field after it is loaded from the database
-	*
-	*  @type	filter
-	*  @since	3.6
-	*  @date	23/01/13
-	*
-	*  @param	$field - the field array holding all the field options
-	*
-	*  @return	$field - the field array holding all the field options
-	*/
-	
-	function load_field( $field )
-	{
-		// Note: This function can be removed if not used
-		return $field;
-	}
-	
-	
-	/*
-	*  update_field()
-	*
-	*  This filter is applied to the $field before it is saved to the database
-	*
-	*  @type	filter
-	*  @since	3.6
-	*  @date	23/01/13
-	*
-	*  @param	$field - the field array holding all the field options
-	*  @param	$post_id - the field group ID (post_type = acf)
-	*
-	*  @return	$field - the modified field
-	*/
-
-	function update_field( $field, $post_id )
-	{
-		// Note: This function can be removed if not used
-		return $field;
-	}
-
-	
 }
-
-
-// create field
-new acf_field_link_picker();
-
-?>
